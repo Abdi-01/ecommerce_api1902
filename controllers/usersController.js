@@ -26,20 +26,42 @@ module.exports = {
         let insertSQL = `Insert into users (username,email,password) values 
         (${db.escape(username)}, ${db.escape(email)}, ${db.escape(hashPassword(password))});`;
 
-        db.query(insertSQL, (err, results) => {
-            if (err) {
+        let getSQL = `Select * from users WHERE email=${db.escape(email)};`
+
+        db.query(getSQL, (errGet, resultsGet) => {
+            if (errGet) {
                 res.status(500).send({
                     success: false,
                     message: "Failed ❌",
-                    error: err
+                    error: errGet
                 });
             };
-            res.status(200).send({
-                success: true,
-                message: "Register success ✅",
-                error: ""
-            });
+
+            if (resultsGet.length > 0) {
+                res.status(400).send({
+                    success: false,
+                    message: "Email exist ⚠️",
+                    error: ""
+                });
+            } else {
+                db.query(insertSQL, (err, results) => {
+                    if (err) {
+                        res.status(500).send({
+                            success: false,
+                            message: "Failed ❌",
+                            error: err
+                        });
+                    };
+                    res.status(200).send({
+                        success: true,
+                        message: "Register success ✅",
+                        error: ""
+                    });
+                })
+            }
         })
+
+
     },
     login: (req, res) => {
         let { email, password } = req.body
