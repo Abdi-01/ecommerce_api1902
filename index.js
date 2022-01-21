@@ -2,11 +2,13 @@ const express = require('express');
 const app = express();
 const cors = require('cors');
 const dotenv = require('dotenv');
+const bearerToken = require("express-bearer-token")
 dotenv.config();
 
 const PORT = process.env.PORT;
 app.use(cors());
 app.use(express.json());
+app.use(bearerToken()); // untuk mengambil data token dari req.header client
 
 // DB Check Connection
 const { db } = require("./config/database")
@@ -28,8 +30,8 @@ const { usersRoute } = require('./routes')
 app.use('/users', usersRoute);
 
 // config error handling
-// app.use((err, req, res) => {
-//     console.log("test", err)
-// })
+app.use((req, res) => {
+    console.log("test", req.resMiddleware)
+})
 
 app.listen(PORT, () => console.log("Ecommerce API RUNNING :", PORT));
