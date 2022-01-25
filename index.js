@@ -25,9 +25,10 @@ db.getConnection((err, connection) => {
 // Routes API Setup
 app.get('/', (req, res) => res.status(200).send("<h2>Welcome to ecommerce API</h2>"));
 
-const { usersRoute } = require('./routes')
+const { usersRoute,productsRoute } = require('./routes')
 
 app.use('/users', usersRoute);
+app.use('/products', productsRoute);
 
 // config error handling
 app.use((req, res) => {

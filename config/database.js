@@ -1,4 +1,5 @@
 const mysql = require('mysql');
+const util = require('util');
 
 const db = mysql.createPool({
     connectionLimit: 1000,
@@ -11,4 +12,6 @@ const db = mysql.createPool({
     database: process.env.DB
 })
 
-module.exports = { db }
+const dbQuery = util.promisify(db.query).bind(db);
+
+module.exports = { db, dbQuery }
