@@ -10,12 +10,14 @@ module.exports = {
             for (let prop in req.query) {
                 filterQuery.push(`${prop == "name" ? `p.${prop}` : prop}=${db.escape(req.query[prop])}`)
             }
-            console.log(filterQuery)
+            console.log("Before", filterQuery)
+            console.log("After", filterQuery.join(" AND "))
 
             let getSql = `select p.*, b.name as brand_name, c.category from products p
                          join brand b on p.idbrand=b.idbrand
-                         join category c on p.idcategory = c.idcategory ${filterQuery.length > 0 ? `WHERE ${filterQuery[0]}` : ""};`
+                         join category c on p.idcategory = c.idcategory ${filterQuery.length > 0 ? `WHERE ${filterQuery.join(" AND ")}` : ""};`
 
+            console.log("After combine getSQL", getSql)
             let resultsProducts = await dbQuery(getSql);
             let resultsImages = await dbQuery(`Select * from images;`);
             let resultsStocks = await dbQuery(`Select * from stocks;`);
