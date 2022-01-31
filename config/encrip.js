@@ -14,7 +14,7 @@ module.exports = {
         jwt.verify(req.token, process.env.TOKEN_KEY, (err, decode) => {
             if (err) {
                 res.status(401).send({
-                    messages: "User not authorization ❌",
+                    messages: "User not authentication ❌",
                     success: false,
                     error: err
                 })

@@ -25,14 +25,15 @@ db.getConnection((err, connection) => {
 // Routes API Setup
 app.get('/', (req, res) => res.status(200).send("<h2>Welcome to ecommerce API</h2>"));
 
-const { usersRoute,productsRoute } = require('./routes')
+const { usersRoute, productsRoute } = require('./routes')
 
 app.use('/users', usersRoute);
 app.use('/products', productsRoute);
 
 // config error handling
 app.use((req, res) => {
-    console.log("test", req.resMiddleware)
+    // console.log("test", res.deliver)
+    res.status(res.deliver.code).send(res.deliver);
 })
 
 app.listen(PORT, () => console.log("Ecommerce API RUNNING :", PORT));
