@@ -37,7 +37,8 @@ module.exports = {
                 let insertUser = await dbQuery(insertSQL);
                 if (insertUser.insertId) {
                     // get data user berdasarkan insertId untuk dijadikan token
-                    let getUser = `Select * from users where iduser=${insertUser.insertId};`
+                    let getUser = await dbQuery(`Select * from users where iduser=${insertUser.insertId};`)
+                    console.log(getUser)
                     let { iduser, username, email, role, status } = getUser[0];
                     let token = createToken({ iduser, username, email, role, status })
                     // mengirimkan email yang berisi token untuk login
@@ -128,6 +129,42 @@ module.exports = {
                     })
                 }
             })
+        }
+    },
+    verification: async (req, res) => {
+        try {
+            console.log(req.dataUser)
+            if (req.dataUser.iduser) {
+            //    1. update status user, yang awalnya Active menjadi Verify
+                await dbQuery(`UPDATE users set status='Verify' WHERE iduser=${db.escape(req.dataUser.iduser)};`);
+            // 2. proses login 
+                let login = await dbQuery(`Select * from users WHERE iduser=${db.escape(req.dataUser.iduser)};`);
+                if (login.length > 0) {
+                    // 3. login berhasil, maka kita buat token baru
+                    let { iduser, username, email, password, role, status } = login[0]
+                    let token = createToken({ iduser, username, email, role, status });
+                    res.status(200).send({
+                        success: true,
+                        messages: "Login Success ✅",
+                        dataLogin: { username, email, role, status, token },
+                        error: ""
+                    })
+                }
+            } else {
+                res.status(401).send({
+                    success: false,
+                    messages: "Verify Failed ❌",
+                    dataLogin: {},
+                    error: ""
+                })
+            }
+        } catch (error) {
+            console.log(error)
+            res.status(500).send({
+                success: false,
+                message: "Failed ❌",
+                error
+            });
         }
     }
 }
