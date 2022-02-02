@@ -26,11 +26,11 @@ module.exports = {
             filename: (req, file, cb) => {
                 console.log("isi data file", file)
                 // membaca tipe data
-                let ext = file.originalname.split('.')[1];
+                let ext = file.originalname.split('.');
                 console.log("extention ", ext)
 
                 // buat nama file yg baru
-                let fileName = fileNamePrefix + Date.now() + '.' + ext;
+                let fileName = fileNamePrefix + Date.now() + '.' + ext[ext.length - 1];
                 console.log("new file name", fileName)
 
                 // eksekusi membuat nama file baru
@@ -52,6 +52,6 @@ module.exports = {
             cb(null, true)
         }
 
-        return multer({storage, fileFilter});
+        return multer({ storage, fileFilter });
     }
 }

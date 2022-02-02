@@ -8,7 +8,7 @@ router.get('/category', productsController.getCategory)
 router.get('/', productsController.getProducts)
 
 // hanya admin yang bisa menggunakan API dibawah ini
-router.post('/', readToken, productsController.addProduct)
+router.post('/', productsController.addProduct)
 router.delete('/:id', readToken, productsController.deleteProduct)
 router.patch('/:id', readToken, productsController.updateProduct)
 

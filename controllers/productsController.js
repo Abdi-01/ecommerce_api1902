@@ -1,7 +1,7 @@
-const { get } = require("express/lib/response");
 const { db, dbQuery } = require("../config/database");
 const Response = require("../config/handling");
-const uploader = require("../config/uploader");
+const { uploader } = require("../config/uploader");
+const fs = require("fs");
 
 module.exports = {
     getBrands: async (req, res, next) => {
@@ -101,67 +101,70 @@ module.exports = {
     },
     addProduct: async (req, res) => {
         try {
-            if (req.dataUser.role == "admin") {
+            // if (req.dataUser.role == "admin") {
 
-                const uploadFile = uploader("/imgProducts", "IMGPRO").array("images", 5);
+            const uploadFile = uploader("/imgProducts", "IMGPRO").array("images", 5);
 
-                uploadFile(req, res, async (error) => {
-                    try {
-                        // cek data yang dikirim front-end
-                        console.log(req.body);
-                        console.log("cek uploadfile :", req.files);
+            uploadFile(req, res, async (error) => {
+                try {
+                    // cek data yang dikirim front-end
+                    console.log(req.body);
+                    console.log("cek uploadfile :", req.files);
 
-                        // proses simpan ke mysql
-                        // untuk menyimpan data products, 
-                        // table yang berpengaruh adalah table products, images, stocks
-                        // console.log(req.body);
-                        //         let { idbrand, idcategory, name, description, price, images, stocks } = req.body;
+                    // proses simpan ke mysql
+                    // untuk menyimpan data products, 
+                    // table yang berpengaruh adalah table products, images, stocks
+                    console.log(req.body);
+                    let { idbrand, idcategory, name, description, price, stocks } = JSON.parse(req.body.data);
 
-                        //         // console.log(`Insert into products values (null, ${db.escape(idbrand)}, ${db.escape(idcategory)}
-                        //         // , ${db.escape(name)}, ${db.escape(description)}, ${db.escape(price)}, 'Active');`)
-                        //         let insertProducts = await dbQuery(`Insert into products values (null, ${db.escape(idbrand)}, ${db.escape(idcategory)}
-                        // , ${db.escape(name)}, ${db.escape(description)}, ${db.escape(price)}, 'Active');`)
+                    // console.log(`Insert into products values (null, ${db.escape(idbrand)}, ${db.escape(idcategory)}
+                    // , ${db.escape(name)}, ${db.escape(description)}, ${db.escape(price)}, 'Active');`)
+                    let insertProducts = await dbQuery(`Insert into products values (null, ${db.escape(idbrand)}, ${db.escape(idcategory)}
+                    , ${db.escape(name)}, ${db.escape(description)}, ${db.escape(price)}, 'Active');`)
 
-                        //         if (insertProducts.insertId) {
-                        //             // lanjut add data tables images dan juga stock
-                        //             // add data ke table images
-                        //             // let insertImages = await dbQuery ; digunakan jika membutuhkan results
-                        //             // cara 1
-                        //             for (let i = 0; i < images.length; i++) {
-                        //                 await dbQuery(`Insert into images values (null, ${insertProducts.insertId}, ${db.escape(images[i])});`)
-                        //             }
+                    if (insertProducts.insertId) {
+                        // lanjut add data tables images dan juga stock
+                        // add data ke table images
+                        // let insertImages = await dbQuery ; digunakan jika membutuhkan results
+                        // cara 1
+                        for (let i = 0; i < req.files.length; i++) {
+                            await dbQuery(`Insert into images values (null, ${insertProducts.insertId},
+                                'http://localhost:2400/imgProducts/${req.files[i].filename}');`)
+                        }
 
-                        //             // cara 2
-                        //             // images.forEach(val=>{
-                        //             //     await dbQuery(`Insert into images values (null, ${insertProducts.insertId}, ${db.escape(val)});`)
-                        //             // })
+                        // cara 2
+                        // images.forEach(async val=>{
+                        //     await dbQuery(`Insert into images values (null, ${insertProducts.insertId}, ${db.escape(val)});`)
+                        // })
 
-                        //             // cara 3
-                        //             // await dbQuery(`Insert into images values ${images.map(val=>`(null, ${insertProducts.insertId}, ${db.escape(val)})`).toString()};`)
+                        // cara 3
+                        // await dbQuery(`Insert into images values ${images.map(val=>`(null, ${insertProducts.insertId}, ${db.escape(val)})`).toString()};`)
 
-                        //             await dbQuery(`Insert into stocks values ${stocks.map(val => `(null, ${insertProducts.insertId}, ${db.escape(val.type)}, ${db.escape(val.qty)})`).toString()};`)
+                        await dbQuery(`Insert into stocks values ${stocks.map(val => `(null, ${insertProducts.insertId}, ${db.escape(val.type)}, ${db.escape(val.qty)})`).toString()};`)
 
-                        //             res.status(200).send({
-                        //                 success: true,
-                        //                 message: "Add product Success ✅"
-                        //             })
-                        //         }
-                    } catch (error) {
-                        // jika addproduct gagal, maka file akan dihapus
-                        fs.unlinkSync(`./public/imgProducts/${req.files.images[0].filename}`)
-                        res.status(500).send({
-                            success: false,
-                            message: "Failed ❌",
-                            error: error
+                        res.status(200).send({
+                            success: true,
+                            message: "Add product Success ✅"
                         })
                     }
-                })
-            } else {
-                res.status(401).send({
-                    success: false,
-                    message: "You can't access this API ⚠️"
-                })
-            }
+                } catch (error) {
+                    console.log(error)
+                    // jika addproduct gagal, maka file akan dihapus
+                    req.files.forEach( val => fs.unlinkSync(`./public/imgProducts/${val.filename}`))
+                    
+                    res.status(500).send({
+                        success: false,
+                        message: "Failed ❌",
+                        error: error
+                    })
+                }
+            })
+            // } else {
+            //     res.status(401).send({
+            //         success: false,
+            //         message: "You can't access this API ⚠️"
+            //     })
+            // }
         } catch (error) {
             console.log(error)
             res.status(500).send({
