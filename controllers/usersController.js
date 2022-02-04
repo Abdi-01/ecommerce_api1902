@@ -135,9 +135,9 @@ module.exports = {
         try {
             console.log(req.dataUser)
             if (req.dataUser.iduser) {
-            //    1. update status user, yang awalnya Active menjadi Verify
+                //    1. update status user, yang awalnya Active menjadi Verify
                 await dbQuery(`UPDATE users set status='Verify' WHERE iduser=${db.escape(req.dataUser.iduser)};`);
-            // 2. proses login 
+                // 2. proses login 
                 let login = await dbQuery(`Select * from users WHERE iduser=${db.escape(req.dataUser.iduser)};`);
                 if (login.length > 0) {
                     // 3. login berhasil, maka kita buat token baru
