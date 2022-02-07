@@ -3,6 +3,8 @@ const { transactionsController } = require('../controllers');
 
 const router = require('express').Router();
 
+router.post('/checkout', readToken, transactionsController.checkout)
+
 router.get('/carts', readToken, transactionsController.getCarts);
 router.post('/carts', readToken, transactionsController.addToCart);
 router.delete('/carts/:id', readToken, transactionsController.deleteCart);
